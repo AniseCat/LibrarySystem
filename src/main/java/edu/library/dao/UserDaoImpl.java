@@ -36,20 +36,20 @@ public class UserDaoImpl implements UserDao{
         if(isAdmin){
             Session session = HibernateUtil.getSession();
             Transaction tx=session.beginTransaction();
-            UserPO userPO = session.get(UserPO.class, userId);
+            AdminPO adminPO = session.get(AdminPO.class, userId);
             tx.commit();
             session.close();
-            if(userPO != null && userPO.getPassword().equals(password)){
+            if(adminPO != null && adminPO.getPassword().equals(password)){
                 success = true;
             }
         }
         else{
             Session session = HibernateUtil.getSession();
             Transaction tx=session.beginTransaction();
-            AdminPO adminPO = session.get(AdminPO.class, userId);
+            UserPO userPO = session.get(UserPO.class, userId);
             tx.commit();
             session.close();
-            if(adminPO != null && adminPO.getPassword().equals(password)){
+            if(userPO != null && userPO.getPassword().equals(password)){
                 success = true;
             }
         }
