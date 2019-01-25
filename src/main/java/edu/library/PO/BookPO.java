@@ -35,6 +35,7 @@ public class BookPO {
 
     @Basic
     @Column(name = "bookType", nullable = true)
+    @Enumerated(EnumType.STRING)
     public BookType getBookType() {
         return bookType;
     }

@@ -45,6 +45,7 @@ public class UserPO {
 
     @Basic
     @Column(name = "userType", nullable = false)
+    @Enumerated(EnumType.STRING)
     public UserType getUserType() {
         return userType;
     }

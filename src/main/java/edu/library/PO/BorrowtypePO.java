@@ -33,6 +33,7 @@ public class BorrowtypePO {
 
     @Basic
     @Column(name = "bookType", nullable = false)
+    @Enumerated(EnumType.STRING)
     public BookType getBookType() {
         return bookType;
     }
