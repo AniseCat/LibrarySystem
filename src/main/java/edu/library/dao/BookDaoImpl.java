@@ -9,14 +9,27 @@ import net.sf.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.sql.Time;
 import java.time.LocalTime;
 import java.util.ArrayList;
 
-
+@Controller
+@RequestMapping("/LibrarySystem")
 public class BookDaoImpl implements BookDao{
 
+    @Autowired
+    public BookDaoImpl() {
+
+    }
+
+    @ResponseBody
+    @PostMapping("book/search")
     public ArrayList<Book> findBooks(String keyword){
         ArrayList<Book> BookList = new ArrayList();
         Session session = HibernateUtil.getSession() ;
@@ -33,6 +46,8 @@ public class BookDaoImpl implements BookDao{
         return BookList;
     }
 
+    @ResponseBody
+    @PostMapping("book/changeBookInformation")
     public boolean modifyBook(String bookInformation){
         boolean success = true;
 
@@ -60,6 +75,8 @@ public class BookDaoImpl implements BookDao{
         return success;
     }
 
+    @ResponseBody
+    @PostMapping("book/showBookInformation")
     public Book getBook(String bookId) {
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
@@ -69,6 +86,8 @@ public class BookDaoImpl implements BookDao{
         return getBook(bookPO);
     }
 
+    @ResponseBody
+    @PostMapping("user/showBorrowInformation")
     public ArrayList<BorrowInformation> checkBorrowRecord(String userId){
         Session session = HibernateUtil.getSession();
         Transaction tx=session.beginTransaction();
@@ -91,6 +110,8 @@ public class BookDaoImpl implements BookDao{
         return borrowRecordList;
     }
 
+    @ResponseBody
+    @PostMapping("user/showFineInformation")
     public ArrayList<BorrowInformation> checkFineRecord(String userId){
         Session session = HibernateUtil.getSession();
         Transaction tx=session.beginTransaction();
@@ -113,6 +134,8 @@ public class BookDaoImpl implements BookDao{
         return borrowRecordList;
     }
 
+    @ResponseBody
+    @PostMapping("user/borrowBook")
     public boolean borrowBook(String userId, String bookId){
         boolean success = true;
         Session session = HibernateUtil.getSession();
@@ -137,6 +160,8 @@ public class BookDaoImpl implements BookDao{
         return success;
     }
 
+    @ResponseBody
+    @PostMapping("user/returnBook")
     public boolean returnBook(String userId, String bookId){
         boolean success = true;
         Session session = HibernateUtil.getSession();
@@ -162,6 +187,8 @@ public class BookDaoImpl implements BookDao{
     /*
     * 暂时没有对应实现
     * */
+    @ResponseBody
+    @PostMapping("/book/readBook")
     public String readBook(String bookId){
 
         return null;

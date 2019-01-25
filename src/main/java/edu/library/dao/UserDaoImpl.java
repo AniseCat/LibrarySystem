@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.ArrayList;
 
 @Controller
-@RequestMapping("/LibrarySystem/user")
+@RequestMapping("/LibrarySystem")
 public class UserDaoImpl implements UserDao{
 
     @Autowired
@@ -30,7 +30,7 @@ public class UserDaoImpl implements UserDao{
     * isAdmin 用于判断是否是管理员账号
     * */
     @ResponseBody
-    @PostMapping("/login")
+    @PostMapping("/user/login")
     public boolean JudgeUser(String userId, String password,boolean isAdmin) {
         boolean success = false;
         if(isAdmin){
@@ -56,6 +56,8 @@ public class UserDaoImpl implements UserDao{
         return success;
     }
 
+    @ResponseBody
+    @PostMapping("/admin/addUser")
     public boolean addUser(String userInfo) {
 
         boolean success = true;
@@ -84,6 +86,8 @@ public class UserDaoImpl implements UserDao{
         return success;
     }
 
+    @ResponseBody
+    @PostMapping("/admin/deleteUser")
     public boolean deleteUser(String userId) {
         boolean success = true;
         Session session = HibernateUtil.getSession() ;
@@ -95,6 +99,8 @@ public class UserDaoImpl implements UserDao{
         return success;
     }
 
+    @ResponseBody
+    @PostMapping("/user/changeInformation")
     public boolean updateUser(User user) {
         boolean success = true;
         UserPO userPO = getUserPO(user);
@@ -108,6 +114,8 @@ public class UserDaoImpl implements UserDao{
         return success;
     }
 
+    @ResponseBody
+    @PostMapping("/user/showInformation")
     public User getUser(String userId){
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
@@ -117,6 +125,8 @@ public class UserDaoImpl implements UserDao{
         return getUser(userPO);
     }
 
+    @ResponseBody
+    @PostMapping("/admin/showChangeInformation")
     public ArrayList getChangedUser() {
         ArrayList changedUserList = new ArrayList();
         User[] beforeAfter = new User[2];
@@ -142,6 +152,8 @@ public class UserDaoImpl implements UserDao{
     /*
     * 寻找所有名字中包含 name 的用户
     * */
+    @ResponseBody
+    @PostMapping("/admin/searchUser")
     public ArrayList<User> findUsers(String name) {
         ArrayList<User> UserList = new ArrayList();
         Session session = HibernateUtil.getSession() ;
