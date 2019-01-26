@@ -6,11 +6,11 @@ import java.util.Date;
 public class BorrowInformation {
     String bookId;
     String userId;
-    Time borrowDate;
-    Time returnDate;
+    Date borrowDate;
+    Date returnDate;
     double totalFine;
 
-    public BorrowInformation(String bookId, String userId, Time borrowDate, Time returnDate, double totalFine) {
+    public BorrowInformation(String bookId, String userId, Date borrowDate, Date returnDate, double totalFine) {
         this.bookId = bookId;
         this.userId = userId;
         this.borrowDate = borrowDate;
@@ -26,11 +26,11 @@ public class BorrowInformation {
         return userId;
     }
 
-    public Time getBorrowDate() {
+    public Date getBorrowDate() {
         return borrowDate;
     }
 
-    public Time getReturnDate() {
+    public Date getReturnDate() {
         return returnDate;
     }
 

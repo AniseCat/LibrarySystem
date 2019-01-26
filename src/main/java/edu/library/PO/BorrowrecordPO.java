@@ -1,13 +1,13 @@
 package edu.library.PO;
 
 import javax.persistence.*;
-import java.sql.Time;
+import java.util.Date;
 
 @Entity
 @Table(name = "borrowrecord", schema = "library", catalog = "")
 public class BorrowrecordPO {
-    private Time borrowTime;
-    private Time returnTime;
+    private Date borrowTime;
+    private Date returnTime;
     private Double fine;
     private int recordId;
     private String userId;
@@ -15,21 +15,21 @@ public class BorrowrecordPO {
 
     @Basic
     @Column(name = "borrowTime", nullable = false)
-    public Time getBorrowTime() {
+    public Date getBorrowTime() {
         return borrowTime;
     }
 
-    public void setBorrowTime(Time borrowTime) {
+    public void setBorrowTime(Date borrowTime) {
         this.borrowTime = borrowTime;
     }
 
     @Basic
     @Column(name = "returnTime", nullable = true)
-    public Time getReturnTime() {
+    public Date getReturnTime() {
         return returnTime;
     }
 
-    public void setReturnTime(Time returnTime) {
+    public void setReturnTime(Date returnTime) {
         this.returnTime = returnTime;
     }
 

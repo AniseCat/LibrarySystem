@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.sql.Time;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Date;
 
 @Controller
 @RequestMapping("/LibrarySystem")
@@ -177,12 +178,14 @@ public class BookDaoImpl implements BookDao{
         boolean success = true;
         Session session = HibernateUtil.getSession();
         Transaction tx=session.beginTransaction();
-        //查询该用户对于该书的最近一次借阅
-        BorrowrecordPO borrowrecordPO = (BorrowrecordPO) session.createQuery("from BorrowrecordPO where userId = ?1 and bookId = ?2 order by borrowTime desc ")
-                .setParameter(1,userId).setParameter(2,bookId).setMaxResults(1).uniqueResult();
-        //如果不存在或者已归还，则可以借
-        if(borrowrecordPO == null || borrowrecordPO.getReturnTime()!= null) {
-            borrowrecordPO = new BorrowrecordPO();
+        String bookName = (String) session.createQuery("from BookPO where bookId = ?1")
+                .setParameter(1,userId).uniqueResult();
+        //查询该用户对于同名书的借阅记录，如果有同名书未归还的情况，则不允许借书
+        ArrayList borrowrecordPOList =
+                (ArrayList) session.createQuery("from BorrowrecordPO br,BookPO bo where bo.bookId = br.bookId and br.returnTime = null and userId = ?1 and bo.name = ?2")
+                        .setParameter(1,userId).setParameter(2,bookName).list();
+        if(borrowrecordPOList == null || borrowrecordPOList.size() == 0) {
+            BorrowrecordPO borrowrecordPO = new BorrowrecordPO();
             borrowrecordPO.setUserId(userId);
             borrowrecordPO.setBookId(bookId);
             borrowrecordPO.setBorrowTime(Time.valueOf(LocalTime.now()));
@@ -215,14 +218,14 @@ public class BookDaoImpl implements BookDao{
         BorrowrecordPO borrowrecordPO = (BorrowrecordPO) session.createQuery("from BorrowrecordPO where userId = ?1 and bookId = ?2 order by borrowTime desc ")
                 .setParameter(1,userId).setParameter(2,bookId).setMaxResults(1).uniqueResult();
         //如果有且未归还，那么可以归还，设置对应的归还时间和罚款金额
-        if(borrowrecordPO != null && borrowrecordPO.getReturnTime()!= null) {
+        if(borrowrecordPO != null && borrowrecordPO.getReturnTime() == null) {
             borrowrecordPO.setReturnTime(Time.valueOf(LocalTime.now()));
             borrowrecordPO.setFine(getFine(userId,borrowrecordPO.getBorrowTime()));
             session.update(borrowrecordPO);
             tx.commit();
             session.close();
         }
-        //没有借过这本书，不能归还
+        //没有借过这本书或已经归还过，不能归还
         else{
             tx.commit();
             session.close();
@@ -270,7 +273,7 @@ public class BookDaoImpl implements BookDao{
     /*
      * 根据用户Id,当前时间和借阅时间计算罚款金额
      * */
-    public double getFine(String userId,Time borrowTime){
+    public double getFine(String userId, Date borrowTime){
         double fine = 0;
         Session session = HibernateUtil.getSession();
         Transaction tx=session.beginTransaction();
@@ -282,7 +285,7 @@ public class BookDaoImpl implements BookDao{
         session.close();
         long timeInterval = Time.valueOf(LocalTime.now()).getTime() - borrowTime.getTime() - maxBorrowTime*60*60*24;
         if(timeInterval > 0)
-            fine = 0.1*(timeInterval/(60*60*24));
+            fine = 0.1*(timeInterval/(60*60*24*1000));
         return fine;
     }
 
