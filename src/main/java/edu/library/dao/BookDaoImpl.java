@@ -295,8 +295,11 @@ public class BookDaoImpl implements BookDao{
      * 将date转化为Timestamp格式
      * */
     public Timestamp toStandardTime(Date date){
-        String nowTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-        return Timestamp.valueOf(nowTime);
+        if (date!=null) {
+            String nowTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+            return Timestamp.valueOf(nowTime);
+        } else
+            return null;
     }
 
 }
