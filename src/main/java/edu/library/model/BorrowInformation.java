@@ -1,16 +1,15 @@
 package edu.library.model;
 
-import java.sql.Time;
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class BorrowInformation {
     String bookId;
     String userId;
-    Date borrowDate;
-    Date returnDate;
+    Timestamp borrowDate;
+    Timestamp returnDate;
     double totalFine;
 
-    public BorrowInformation(String bookId, String userId, Date borrowDate, Date returnDate, double totalFine) {
+    public BorrowInformation(String bookId, String userId, Timestamp borrowDate, Timestamp returnDate, double totalFine) {
         this.bookId = bookId;
         this.userId = userId;
         this.borrowDate = borrowDate;
@@ -26,11 +25,11 @@ public class BorrowInformation {
         return userId;
     }
 
-    public Date getBorrowDate() {
+    public Timestamp getBorrowDate() {
         return borrowDate;
     }
 
-    public Date getReturnDate() {
+    public Timestamp getReturnDate() {
         return returnDate;
     }
 

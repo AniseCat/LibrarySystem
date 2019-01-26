@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -188,7 +190,7 @@ public class BookDaoImpl implements BookDao{
             BorrowrecordPO borrowrecordPO = new BorrowrecordPO();
             borrowrecordPO.setUserId(userId);
             borrowrecordPO.setBookId(bookId);
-            borrowrecordPO.setBorrowTime(Time.valueOf(LocalTime.now()));
+            borrowrecordPO.setBorrowTime(new Timestamp(System.currentTimeMillis()));
             //生成一条新的借阅信息并保存到数据库
             session.save(borrowrecordPO);
             tx.commit();
@@ -219,7 +221,7 @@ public class BookDaoImpl implements BookDao{
                 .setParameter(1,userId).setParameter(2,bookId).setMaxResults(1).uniqueResult();
         //如果有且未归还，那么可以归还，设置对应的归还时间和罚款金额
         if(borrowrecordPO != null && borrowrecordPO.getReturnTime() == null) {
-            borrowrecordPO.setReturnTime(Time.valueOf(LocalTime.now()));
+            borrowrecordPO.setReturnTime(new Timestamp(System.currentTimeMillis()));
             borrowrecordPO.setFine(getFine(userId,borrowrecordPO.getBorrowTime()));
             session.update(borrowrecordPO);
             tx.commit();
@@ -267,7 +269,7 @@ public class BookDaoImpl implements BookDao{
             fine = po.getFine();
         else
             fine = getFine(po.getUserId(),po.getBorrowTime());
-        return new BorrowInformation(po.getBookId(), po.getUserId(), po.getBorrowTime(), po.getReturnTime(),fine);
+        return new BorrowInformation(po.getBookId(), po.getUserId(), toStandardTime(po.getBorrowTime()), toStandardTime(po.getReturnTime()),fine);
     }
 
     /*
@@ -287,6 +289,14 @@ public class BookDaoImpl implements BookDao{
         if(timeInterval > 0)
             fine = 0.1*(timeInterval/(60*60*24*1000));
         return fine;
+    }
+
+    /*
+     * 将date转化为Timestamp格式
+     * */
+    public Timestamp toStandardTime(Date date){
+        String nowTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+        return Timestamp.valueOf(nowTime);
     }
 
 }
