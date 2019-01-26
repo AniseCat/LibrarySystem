@@ -45,12 +45,12 @@ public class BookDaoImpl implements BookDao{
         Query query = session.createQuery("from BookPO where name like ?1")
                 .setParameter(1,"%"+keyword+"%");
         ArrayList bookPOList = (ArrayList) query.list();
+        tx.commit();
+        session.close();
         for(int i = 0; i < bookPOList.size(); i++){
             //将转化后的Book加入list
             BookList.add(getBook((BookPO)bookPOList.get(i)));
         }
-        tx.commit();
-        session.close();
         return BookList;
     }
 

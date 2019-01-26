@@ -171,6 +171,8 @@ public class UserDaoImpl implements UserDao{
         //获取所有信息修改用户的修改前数据
         Query query = session.createQuery("from ChangeduserPO");
         ArrayList afterList = (ArrayList) query.list();
+        tx.commit();
+        session.close();
         int size = afterList.size();
         for(int i = 0; i < size; i++){
             //根据修改前数据，获取修改后数据
@@ -181,8 +183,6 @@ public class UserDaoImpl implements UserDao{
             //加入list
             changedUserList.add(beforeAfter);
         }
-        tx.commit();
-        session.close();
         //方法被调用，说明该呈现的修改信息已经无用，清空修改后的用户表
         clearChangedUser();
         return changedUserList;
@@ -201,13 +201,13 @@ public class UserDaoImpl implements UserDao{
         Query query = session.createQuery("from UserPO where name like ?1")
                 .setParameter(1,"%"+name+"%");
         ArrayList userPOList = (ArrayList) query.list();
+        tx.commit();
+        session.close();
         for(int i = 0; i < userPOList.size(); i++){
             String userId = ((UserPO)userPOList.get(i)).getUserId();
             //转化为User并存入list
             UserList.add(getUser(userId));
         }
-        tx.commit();
-        session.close();
         return UserList;
     }
 
@@ -274,8 +274,7 @@ public class UserDaoImpl implements UserDao{
     public void clearChangedUser(){
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
-        session.createQuery("delete from ChangeduserPO where authorityId != ?1")
-                .setParameter(1,null);
+        session.createQuery("delete ChangeduserPO").executeUpdate();
         tx.commit();
         session.close();
     }

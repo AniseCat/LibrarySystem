@@ -19,6 +19,7 @@ public class HibernateUtil {
         config.addAnnotatedClass(BorrowrecordPO.class);
         config.addAnnotatedClass(BorrowtypePO.class);
         config.addAnnotatedClass(UserPO.class);
+        config.addAnnotatedClass(ChangeduserPO.class);
 
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(config.getProperties()).build();
