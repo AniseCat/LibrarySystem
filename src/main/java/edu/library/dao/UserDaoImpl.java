@@ -25,30 +25,35 @@ public class UserDaoImpl implements UserDao{
     public UserDaoImpl() {
 
     }
+
     /*
-    * 判断用户名与密码是否匹配
-    * isAdmin 用于判断是否是管理员账号
+    * 判断用户登录
+    * userId 用户名
+    * password 输入密码
+    * isAdmin 是否为管理员
     * */
     @ResponseBody
     @PostMapping("/user/login")
     public boolean JudgeUser(String userId, String password,boolean isAdmin) {
         boolean success = false;
-        if(isAdmin){
+        if(isAdmin){//是管理员，查询管理员对应表
             Session session = HibernateUtil.getSession();
             Transaction tx=session.beginTransaction();
             AdminPO adminPO = session.get(AdminPO.class, userId);
             tx.commit();
             session.close();
+            //如果查到数据且实际密码与输入密码相同，登录成功
             if(adminPO != null && adminPO.getPassword().equals(password)){
                 success = true;
             }
         }
-        else{
+        else{//是普通用户，查询用户对应表
             Session session = HibernateUtil.getSession();
             Transaction tx=session.beginTransaction();
             UserPO userPO = session.get(UserPO.class, userId);
             tx.commit();
             session.close();
+            //如果查到数据且实际密码与输入密码相同，登录成功
             if(userPO != null && userPO.getPassword().equals(password)){
                 success = true;
             }
@@ -56,12 +61,17 @@ public class UserDaoImpl implements UserDao{
         return success;
     }
 
+    /*
+     * 创建用户
+     * userInfo 包含用户信息的json串
+     * */
     @ResponseBody
     @PostMapping("/admin/addUser")
     public boolean addUser(String userInfo) {
 
         boolean success = true;
 
+        //从传入的jsonString 获取对应信息
         JSONObject jsonObject = JSONObject.fromObject(userInfo);
         String userId = jsonObject.getString("userId");
         String password = jsonObject.getString("password");
@@ -70,6 +80,7 @@ public class UserDaoImpl implements UserDao{
                 jsonObject.getString("userType"));
         int authorityId = jsonObject.getInt("authorityId");
 
+        //新建一个UserPO
         UserPO userPO = new UserPO();
         userPO.setUserId(userId);
         userPO.setPassword(password);
@@ -79,6 +90,7 @@ public class UserDaoImpl implements UserDao{
 
         Session session = HibernateUtil.getSession();
         Transaction tx=session.beginTransaction();
+        //存入UserPO表
         session.save(userPO);
         tx.commit();
         session.close();
@@ -86,65 +98,92 @@ public class UserDaoImpl implements UserDao{
         return success;
     }
 
+    /*
+     * 删除用户
+     * userId 用户名
+     * */
     @ResponseBody
     @PostMapping("/admin/deleteUser")
     public boolean deleteUser(String userId) {
         boolean success = true;
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
+        //找到用户名对应的PO数据
         UserPO userPO = session.get(UserPO.class,userId);
+        //从数据库中删除
         session.delete(userPO);
         tx.commit();
         session.close();
         return success;
     }
 
+    /*
+     * 修改用户信息
+     * User 用户实体
+     * */
     @ResponseBody
     @PostMapping("/user/changeInformation")
     public boolean updateUser(User user) {
         boolean success = true;
+        //将User转化为UserPO
         UserPO userPO = getUserPO(user);
         //保存修改前信息到修改用户表
         addChangdeUser(userPO.getUserId());
+
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
+        //更新数据库的数据
         session.update(userPO);
         tx.commit();
         session.close();
         return success;
     }
 
+    /*
+     * 获取用户
+     * userId 用户名
+     * */
     @ResponseBody
     @PostMapping("/user/showInformation")
     public User getUser(String userId){
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
+        //根据userId获取用户
         UserPO userPO = session.get(UserPO.class,userId);
         tx.commit();
         session.close();
+        //将转化为User的UserPO返回
         return getUser(userPO);
     }
 
+    /*
+     * 获取修改用户的前后信息
+     * */
     @ResponseBody
     @PostMapping("/admin/showChangeInformation")
     public ArrayList getChangedUser() {
+
         ArrayList changedUserList = new ArrayList();
         User[] beforeAfter = new User[2];
+
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
+        //获取所有信息修改用户的修改前数据
         Query query = session.createQuery("from ChangeduserPO");
         ArrayList afterList = (ArrayList) query.list();
         int size = afterList.size();
         for(int i = 0; i < size; i++){
+            //根据修改前数据，获取修改后数据
             ChangeduserPO afterUser = (ChangeduserPO)afterList.get(i);
             String userId = afterUser.getUserId();
             beforeAfter[0] = getUser(userId);
             beforeAfter[1] = getUser(afterUser);
+            //加入list
             changedUserList.add(beforeAfter);
         }
         tx.commit();
         session.close();
-        //清空修改后的用户表
+        //方法被调用，说明该呈现的修改信息已经无用，清空修改后的用户表
         clearChangedUser();
         return changedUserList;
     }
@@ -158,11 +197,13 @@ public class UserDaoImpl implements UserDao{
         ArrayList<User> UserList = new ArrayList();
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
+        //获取对应的UserPO
         Query query = session.createQuery("from UserPO where name like ?1")
                 .setParameter(1,"%"+name+"%");
         ArrayList userPOList = (ArrayList) query.list();
         for(int i = 0; i < userPOList.size(); i++){
             String userId = ((UserPO)userPOList.get(i)).getUserId();
+            //转化为User并存入list
             UserList.add(getUser(userId));
         }
         tx.commit();
@@ -171,9 +212,11 @@ public class UserDaoImpl implements UserDao{
     }
 
 
+
+    //将重复代码提取为子程序
+
     /*
-    * 将重复代码提取为子程序
-    *
+    * 将User转化为UserPO
     * */
     public UserPO getUserPO(User user){
         UserPO userPO = new UserPO();
@@ -185,26 +228,35 @@ public class UserDaoImpl implements UserDao{
         return userPO;
     }
 
+    /*
+     * 将UserPO转化为User
+     * */
     public User getUser(UserPO userPO){
         User u = new User();
         u.setId(userPO.getUserId());
         u.setPassword(userPO.getPassword());
         u.setName(userPO.getName());
-        u.setUserType((UserType) userPO.getUserType());
+        u.setUserType(userPO.getUserType());
         u.setBorrowAuthority(getBorrowAuthority(userPO.getAuthorityId()));
         return u;
     }
 
+    /*
+     * 将ChangedUserPO转化为User
+     * */
     public User getUser(ChangeduserPO changeduserPO){
         User u = new User();
         u.setId(changeduserPO.getUserId());
         u.setPassword(changeduserPO.getPassword());
         u.setName(changeduserPO.getName());
-        u.setUserType((UserType) changeduserPO.getUserType());
+        u.setUserType(changeduserPO.getUserType());
         u.setBorrowAuthority(getBorrowAuthority(changeduserPO.getAuthorityId()));
         return u;
     }
 
+    /*
+     * 根据借书权限Id获取借书权限
+     * */
     public BorrowAuthority getBorrowAuthority(int authorityId){
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
@@ -216,6 +268,9 @@ public class UserDaoImpl implements UserDao{
         return borrowAuthority;
     }
 
+    /*
+     * 清空用户修改列表
+     * */
     public void clearChangedUser(){
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
@@ -225,12 +280,15 @@ public class UserDaoImpl implements UserDao{
         session.close();
     }
 
+    /*
+     * 向用户修改列表中增加用户修改信息
+     * */
     public void addChangdeUser(String userId){
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
         UserPO userPO = session.get(UserPO.class,userId);
         ChangeduserPO changeduserPO = session.get(ChangeduserPO.class,userId);
-        if(changeduserPO == null) {
+        if(changeduserPO == null) {//如果没有找到对应的修改前信息，则新建并保存
             changeduserPO = new ChangeduserPO();
             changeduserPO.setUserId(userPO.getUserId());
             changeduserPO.setPassword(userPO.getPassword());
@@ -239,7 +297,8 @@ public class UserDaoImpl implements UserDao{
             changeduserPO.setAuthorityId(userPO.getAuthorityId());
             session.save(changeduserPO);
         }
-        else{
+        /*
+        else{//如果找到了，不必进行更新，修改前信息是最初信息
             changeduserPO = new ChangeduserPO();
             changeduserPO.setUserId(userPO.getUserId());
             changeduserPO.setPassword(userPO.getPassword());
@@ -248,6 +307,7 @@ public class UserDaoImpl implements UserDao{
             changeduserPO.setAuthorityId(userPO.getAuthorityId());
             session.update(changeduserPO);
         }
+        */
         tx.commit();
         session.close();
     }
