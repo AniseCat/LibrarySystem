@@ -271,7 +271,7 @@ public class UserDaoImpl implements UserDao{
         tx=session.beginTransaction();
         ArrayList borrowtypeList = (ArrayList) session.
                 createQuery("select bookType from BorrowtypePO where authorityId = ?1")
-                .setParameter(1,authorityId);
+                .setParameter(1,authorityId).list();
         tx.commit();
         session.close();
         for(int i = 0; i < borrowtypeList.size(); i++){
