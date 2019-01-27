@@ -37,13 +37,16 @@ public class BookDaoImpl implements BookDao{
      * */
     @ResponseBody
     @PostMapping("book/search")
-    public ArrayList<Book> findBooks(String keyword){
+    public ArrayList<Book> findBooks(String userId, String keyword){
         ArrayList<Book> BookList = new ArrayList();
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
         //构造hql语句，获取对应的list
-        Query query = session.createQuery("from BookPO where name like ?1")
-                .setParameter(1,"%"+keyword+"%");
+        Query query =
+                session.createQuery("from UserPO u, BookPO bo, BorrowtypePO br " +
+                        "where bo.name like ?1 and u.name = ?2 " +
+                        "and u.authorityId = br.authorityId and br.bookType = bo.bookType")
+                .setParameter(1,"%"+keyword+"%").setParameter(2,userId);
         ArrayList bookPOList = (ArrayList) query.list();
         tx.commit();
         session.close();

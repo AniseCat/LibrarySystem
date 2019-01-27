@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public interface BookDao {
 
-    public ArrayList<Book> findBooks(String keyword);
+    public ArrayList<Book> findBooks(String userId, String keyword);
 
     public boolean modifyBook(String bookInformation);
 
