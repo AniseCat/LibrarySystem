@@ -81,7 +81,7 @@ public class BookDaoImpl implements BookDao{
         Session session = HibernateUtil.getSession();
         Transaction tx=session.beginTransaction();
         //存入数据库
-        session.save(bookPO);
+        session.update(bookPO);
         tx.commit();
         session.close();
 
