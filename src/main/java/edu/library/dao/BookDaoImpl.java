@@ -42,8 +42,12 @@ public class BookDaoImpl implements BookDao{
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
         //构造hql语句，获取对应的list
-        Query query =
-                session.createQuery("from UserPO u, BookPO bo, BorrowtypePO br " +
+        Query query;
+        if(userId == null)
+            query = session.createQuery("from UserPO u, BookPO bo, BorrowtypePO br " +
+                    "where bo.name like ?1").setParameter(1,"%"+keyword+"%");
+        else
+            query = session.createQuery("from UserPO u, BookPO bo, BorrowtypePO br " +
                         "where bo.name like ?1 and u.name = ?2 " +
                         "and u.authorityId = br.authorityId and br.bookType = bo.bookType")
                 .setParameter(1,"%"+keyword+"%").setParameter(2,userId);
