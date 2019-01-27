@@ -44,8 +44,8 @@ public class BookDaoImpl implements BookDao{
         //构造hql语句，获取对应的list
         Query query;
         if(userId == null)
-            query = session.createQuery("from UserPO u, BookPO bo, BorrowtypePO br " +
-                    "where bo.name like ?1").setParameter(1,"%"+keyword+"%");
+            query = session.createQuery("from BookPO where name like ?1")
+                    .setParameter(1,"%"+keyword+"%");
         else
             query = session.createQuery("from UserPO u, BookPO bo, BorrowtypePO br " +
                         "where bo.name like ?1 and u.name = ?2 " +
