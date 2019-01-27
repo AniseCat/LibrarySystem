@@ -67,24 +67,15 @@ public class UserDaoImpl implements UserDao{
      * */
     @ResponseBody
     @PostMapping("/admin/addUser")
-    public boolean addUser(String userInfo) {
+    public boolean addUser(String userId, String username, String password, UserType userType, int authorityId){
 
         boolean success = true;
-
-        //从传入的jsonString 获取对应信息
-        JSONObject jsonObject = JSONObject.fromObject(userInfo);
-        String userId = jsonObject.getString("userId");
-        String password = jsonObject.getString("password");
-        String name = jsonObject.getString("name");
-        UserType userType = Enum.valueOf(UserType.class,
-                jsonObject.getString("userType"));
-        int authorityId = jsonObject.getInt("authorityId");
 
         //新建一个UserPO
         UserPO userPO = new UserPO();
         userPO.setUserId(userId);
         userPO.setPassword(password);
-        userPO.setName(name);
+        userPO.setName(username);
         userPO.setUserType(userType);
         userPO.setAuthorityId(authorityId);
 
@@ -123,10 +114,15 @@ public class UserDaoImpl implements UserDao{
      * */
     @ResponseBody
     @PostMapping("/user/changeInformation")
-    public boolean updateUser(User user) {
+    public boolean updateUser(String userId, String username, String password, UserType userType, int authorityId){
         boolean success = true;
-        //将User转化为UserPO
-        UserPO userPO = getUserPO(user);
+        //新建一个UserPO
+        UserPO userPO = new UserPO();
+        userPO.setUserId(userId);
+        userPO.setPassword(password);
+        userPO.setName(username);
+        userPO.setUserType(userType);
+        userPO.setAuthorityId(authorityId);
         //保存修改前信息到修改用户表
         addChangdeUser(userPO.getUserId());
 

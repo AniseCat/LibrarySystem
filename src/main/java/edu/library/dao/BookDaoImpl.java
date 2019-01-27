@@ -63,17 +63,8 @@ public class BookDaoImpl implements BookDao{
      * */
     @ResponseBody
     @PostMapping("book/changeBookInformation")
-    public boolean modifyBook(String bookInformation){
+    public boolean modifyBook(String bookId, String name, BookType bookType,String bookFormat, String bookUrl){
         boolean success = true;
-
-        //根据jsonString获取Book数据
-        JSONObject jsonObject = JSONObject.fromObject(bookInformation);
-        String bookId = jsonObject.getString("bookId");
-        String name = jsonObject.getString("name");
-        BookType bookType = Enum.valueOf(BookType.class,
-                jsonObject.getString("bookType"));
-        String bookFormat = jsonObject.getString("bookFormat");
-        String bookUrl = jsonObject.getString("bookUrl");
 
         //构造BookPO
         BookPO bookPO = new BookPO();
@@ -245,7 +236,13 @@ public class BookDaoImpl implements BookDao{
     @ResponseBody
     @PostMapping("/book/readBook")
     public String readBook(String bookId){
-        return null;
+        Session session = HibernateUtil.getSession() ;
+        Transaction tx=session.beginTransaction();
+        //根据Id获取BookPO
+        BookPO bookPO = session.get(BookPO.class,bookId);
+        tx.commit();
+        session.close();
+        return bookPO.getBookUrl();
     }
 
     //将重复代码提取为子程序

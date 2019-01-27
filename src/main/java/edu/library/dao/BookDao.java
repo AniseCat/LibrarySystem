@@ -1,6 +1,7 @@
 package edu.library.dao;
 
 import edu.library.model.Book;
+import edu.library.model.BookType;
 import edu.library.model.BorrowInformation;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ public interface BookDao {
 
     public ArrayList<Book> findBooks(String userId, String keyword);
 
-    public boolean modifyBook(String bookInformation);
+    public boolean modifyBook(String bookId, String name, BookType bookType, String bookFormat, String bookUrl);
 
     public Book getBook(String bookId);
 
