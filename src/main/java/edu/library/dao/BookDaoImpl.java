@@ -278,7 +278,7 @@ public class BookDaoImpl implements BookDao{
     /*
      * 根据用户Id,当前时间和借阅时间计算罚款金额
      * */
-    public double getFine(String userId, Date borrowTime){
+    public double getFine(String userId, Timestamp borrowTime){
         double fine = 0;
         Session session = HibernateUtil.getSession();
         Transaction tx=session.beginTransaction();
@@ -288,7 +288,7 @@ public class BookDaoImpl implements BookDao{
                 .setParameter(1,authorityId).uniqueResult();
         tx.commit();
         session.close();
-        long timeInterval = Time.valueOf(LocalTime.now()).getTime() - borrowTime.getTime() - maxBorrowTime*60*60*24;
+        long timeInterval = new Timestamp(System.currentTimeMillis()).getTime() - borrowTime.getTime() - maxBorrowTime*60*60*24*1000;
         if(timeInterval > 0)
             fine = 0.1*(timeInterval/(60*60*24*1000));
         return fine;
