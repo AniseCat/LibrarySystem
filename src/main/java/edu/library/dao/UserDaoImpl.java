@@ -1,8 +1,7 @@
 package edu.library.dao;
 
-import edu.library.PO.AdminPO;
-import edu.library.PO.ChangeduserPO;
-import edu.library.PO.UserPO;
+import edu.library.PO.*;
+import edu.library.model.BookType;
 import edu.library.model.BorrowAuthority;
 import edu.library.model.User;
 import edu.library.model.UserType;
@@ -228,13 +227,17 @@ public class UserDaoImpl implements UserDao{
      * 将UserPO转化为User
      * */
     public User getUser(UserPO userPO){
-        User u = new User();
-        u.setId(userPO.getUserId());
-        u.setPassword(userPO.getPassword());
-        u.setName(userPO.getName());
-        u.setUserType(userPO.getUserType());
-        u.setBorrowAuthority(getBorrowAuthority(userPO.getAuthorityId()));
-        return u;
+        if(userPO == null)
+            return null;
+        else {
+            User u = new User();
+            u.setId(userPO.getUserId());
+            u.setPassword(userPO.getPassword());
+            u.setName(userPO.getName());
+            u.setUserType(userPO.getUserType());
+            u.setBorrowAuthority(getBorrowAuthority(userPO.getAuthorityId()));
+            return u;
+        }
     }
 
     /*
@@ -256,11 +259,25 @@ public class UserDaoImpl implements UserDao{
     public BorrowAuthority getBorrowAuthority(int authorityId){
         Session session = HibernateUtil.getSession() ;
         Transaction tx=session.beginTransaction();
-        BorrowAuthority borrowAuthority = (BorrowAuthority)session.
+        BorrowauthorityPO borrowauthorityPO = (BorrowauthorityPO)session.
                 createQuery("from BorrowauthorityPO where authorityId = ?1")
                 .setParameter(1,authorityId).uniqueResult();
         tx.commit();
         session.close();
+        int maxBorrowNum = borrowauthorityPO.getMaxBorrowNum();
+        int maxBorrowTime = borrowauthorityPO.getMaxBorrowTime();
+        ArrayList<BookType> bookTypes = new ArrayList<>();
+        session = HibernateUtil.getSession() ;
+        tx=session.beginTransaction();
+        ArrayList borrowtypeList = (ArrayList) session.
+                createQuery("select bookType from BorrowtypePO where authorityId = ?1")
+                .setParameter(1,authorityId);
+        tx.commit();
+        session.close();
+        for(int i = 0; i < borrowtypeList.size(); i++){
+            bookTypes.add((BookType)borrowtypeList.get(i));
+        }
+        BorrowAuthority borrowAuthority = new BorrowAuthority(authorityId,maxBorrowNum,maxBorrowTime,bookTypes);
         return borrowAuthority;
     }
 
